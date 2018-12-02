@@ -82,46 +82,10 @@ class DataStore(object):
         self.init_Const()
        
         if txy_desired is not None:
-            #check type and shape of input txy_desired
-            if not isinstance(txy_desired, np.ndarray):
-                errmsg = ("DataStore can only be instantiated with n-by-3 "
-                          "numpy ndarray as input argument if any.")
-                raise TypeError(errmsg)
-            isnot2dim = txy_desired.ndim is not 2
-            isnot3col = txy_desired.ndim is 2 and txy_desired.shape[1] is not 3
-            if isnot2dim or isnot3col:
-                errmsg = ("DataStore can only be instantiated with n-by-3 "
-                          "numpy ndarray as input argument if any.")
-                raise ValueError(errmsg)
-            #check nan or inf in input txy_desired
-            if np.isnan(txy_desired).any() or np.isinf(txy_desired).any():
-                errmsg = ("DataStore can only be instantiated with n-by-3 "
-                          "numpy ndarray as input argument if any.")
-                raise ValueError
-
-            #attr calculated from input txy_desired
-            self.n = txy_desired.shape[0] #number of time points
-            self.t = txy_desired[:,0].astype(float)
-            self.path_desired = txy_desired[:,1:].astype(float)
-            #attr initialized with all entries being zeros but of correct
-            #shapes
-            self.path_obs = np.zeros_like(self.path_desired)
-            self.field = np.zeros((self.n, 2))
-            self.state = np.zeros((2*self.Const.m+1, self.n))
-            self.noise_stat = dict({
-                "mean": np.zeros((self.n, 2)),
-                "sd": np.zeros((self.n, 2))
-                })
-
-            #raise error if time not strictly increasing
-            if not np.all( self.t[1:] > self.t[:-1] ):
-                errmsg = ("Time series provided is not strictly increasing.")
-                raise ValueError(errmsg)
-
+            self.init_others(txy_desired)
 
     def init_Const(self):
         """Called by __init__ to initialize attr Const."""
-
         Const = namedtuple('const',['m','B','mu','hbar','K','w1'])
         m = 8                       # maximum energy quantum number
         B = 4.4033e-24 / 4.36e-18   # Joules; rotational constant;
@@ -133,6 +97,45 @@ class DataStore(object):
                                     # not seen else where in the .m file
         w1 = B/hbar                 # first energy level spacing
         self.Const = Const(m, B, mu, hbar, K, w1)
+
+    def init_others(self, txy_desired):
+        """Called by __init__ to initialize attr other than Const."""
+        #check type and shape of input txy_desired
+        if not isinstance(txy_desired, np.ndarray):
+            errmsg = ("DataStore can only be instantiated with n-by-3 "
+                      "numpy ndarray as input argument if any.")
+            raise TypeError(errmsg)
+        isnot2dim = txy_desired.ndim is not 2
+        isnot3col = txy_desired.ndim is 2 and txy_desired.shape[1] is not 3
+        if isnot2dim or isnot3col:
+            errmsg = ("DataStore can only be instantiated with n-by-3 "
+                      "numpy ndarray as input argument if any.")
+            raise ValueError(errmsg)
+        #check nan or inf in input txy_desired
+        if np.isnan(txy_desired).any() or np.isinf(txy_desired).any():
+            errmsg = ("DataStore can only be instantiated with n-by-3 "
+                      "numpy ndarray as input argument if any.")
+            raise ValueError(errmsg)
+
+        #attr calculated from input txy_desired
+        self.n = txy_desired.shape[0] #number of time points
+        self.t = txy_desired[:,0].astype(float)
+        self.path_desired = txy_desired[:,1:].astype(float)
+        #attr initialized with all entries being zeros but of correct
+        #shapes
+        self.path_obs = np.zeros_like(self.path_desired)
+        self.field = np.zeros((self.n, 2))
+        self.state = np.zeros((2*self.Const.m+1, self.n))
+        self.noise_stat = dict({
+            "mean": np.zeros((self.n, 2)),
+            "sd": np.zeros((self.n, 2))
+            })
+
+        #raise error if time not strictly increasing
+        if not np.all( self.t[1:] > self.t[:-1] ):
+            errmsg = ("Time series provided is not strictly increasing.")
+            raise ValueError(errmsg)
+
 
 
 
