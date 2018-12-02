@@ -68,8 +68,13 @@ class DataStore(object):
 
         Raises:
 
-            ValueError: if time in txy_desired (i.e. txy_desired[:,0]) is 
-            not strictly increasing.
+            TypeError: if input is not an instance of numpy.ndarray
+
+            ValueError: if one of the following:
+                -- txy_desired is not of shape (n,3)
+                -- txy_desired contains nan or inf
+                -- time in txy_desired (i.e. txy_desired[:,0]) is not 
+                strictly increasing.
 
         """
         
