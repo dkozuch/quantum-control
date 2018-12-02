@@ -27,9 +27,10 @@ class DataStore(object):
             -- K:       4pi * epsilon0
             -- w1:      first energy level spacing
 
-        n: Number of time points.
+        n: Number of time points. n is guaranteed to be >= 2.
 
-        t: Time at each time points. A numpy ndarray of shape (n,).
+        t: Time at each time points guaranteed to be strictly increasing.
+        A numpy ndarray of shape (n,).
 
         path_desired: User-specified desired path of dipole projection 
         described by x and y (in this order). A numpy ndarray of shape 
@@ -62,8 +63,13 @@ class DataStore(object):
         Parameters:
 
             txy_desired: Optional. A numpy ndarray of shape (n,3) where 
-            each row contains (in this order) time, x projection and y 
-            projection of path defined by user. 
+            n >= 2 and each row contains (in this order) time, x projection
+            and y projection of path defined by user. 
+
+        Raises:
+
+            ValueError: if time in txy_desired (i.e. txy_desired[:,0]) is 
+            not strictly increasing.
 
         """
         
@@ -71,10 +77,27 @@ class DataStore(object):
         self.init_Const()
        
         if txy_desired is not None:
+            #check type and shape of input txy_desired
+            if not isinstance(txy_desired, np.ndarray):
+                errmsg = ("DataStore can only be instantiated with n-by-3 "
+                          "numpy ndarray as input argument if any.")
+                raise TypeError(errmsg)
+            isnot2dim = txy_desired.ndim is not 2
+            isnot3col = txy_desired.ndim is 2 and txy_desired.shape[1] is not 3
+            if isnot2dim or isnot3col:
+                errmsg = ("DataStore can only be instantiated with n-by-3 "
+                          "numpy ndarray as input argument if any.")
+                raise ValueError(errmsg)
+            #check nan or inf in input txy_desired
+            if np.isnan(txy_desired).any() or np.isinf(txy_desired).any():
+                errmsg = ("DataStore can only be instantiated with n-by-3 "
+                          "numpy ndarray as input argument if any.")
+                raise ValueError
+
             #attr calculated from input txy_desired
             self.n = txy_desired.shape[0] #number of time points
-            self.t = txy_desired[:,0]
-            self.path_desired = txy_desired[:,1:2]
+            self.t = txy_desired[:,0].astype(float)
+            self.path_desired = txy_desired[:,1:].astype(float)
             #attr initialized with all entries being zeros but of correct
             #shapes
             self.path_obs = np.zeros_like(self.path_desired)
@@ -84,6 +107,11 @@ class DataStore(object):
                 "mean": np.zeros((self.n, 2)),
                 "sd": np.zeros((self.n, 2))
                 })
+
+            #raise error if time not strictly increasing
+            if not np.all( self.t[1:] > self.t[:-1] ):
+                errmsg = ("Time series provided is not strictly increasing.")
+                raise ValueError(errmsg)
 
 
     def init_Const(self):
