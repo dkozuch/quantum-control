@@ -27,6 +27,7 @@ class import_path(tk.Tk):
 		#bind commands
 		self.bind('<B1-Motion>', self.position_previous)
 		self.canvas.bind('<B1-Motion>', self.draw_line)
+		self.bind('<B1-Motion>',self.record_coordinates)
 
 	def position_previous(self,event):
 		'''Need the track the previous position for drawing lines'''
@@ -53,6 +54,17 @@ class import_path(tk.Tk):
 		self.previous_y = event.y
 		
 		self.counter += 1
+		
+	def record_coordinates(self, event):
+		'''Keep every coordinate in a list, but not repeating coordinates
+		NOTE: need to subtract y from height since pixels are recorded from top'''
+		
+		if len(self.coordinate_list) == 0:
+			self.coordinate_list.append([event.x, self.height - event.y])
+		#don't record duplicates
+		else:
+			if event.x != self.coordinate_list[-1][0] or event.y != self.coordinate_list[-1][1]:
+				self.coordinate_list.append([event.x, self.height - event.y])
 
 if __name__ == "__main__":
 
