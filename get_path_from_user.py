@@ -91,6 +91,20 @@ class import_path(tk.Tk):
 		filename = filedialog.askopenfilename(parent=root, initialdir="./", title='Please select a file')
 		self.coordinate_list = np.loadtxt(filename, comments = ('#'))
 		self.destroy()
+		
+	def get_coordinates(self):
+		'''Returns the list of coordinates as numpy array'''
+		coords = np.array(self.coordinate_list)
+		return coords
+		
+	def plot_coordinates(self):
+		'''Plot coordinates held in coordinate list'''
+		coords = self.get_coordinates()
+		coords = root.get_coordinates()
+		color_idx = np.linspace(0, 1, len(coords))
+		for i in range(0,len(coords)):
+			plt.plot([coords[i,0]],[coords[i,1]],'o',color=plt.cm.cool(color_idx[i]))
+		plt.show()
 
 if __name__ == "__main__":
 
@@ -99,6 +113,9 @@ if __name__ == "__main__":
 
 	#start event driven loop
 	root.mainloop()
+	
+	#plot to check
+	root.plot_coordinates()
 	
 	
 	
