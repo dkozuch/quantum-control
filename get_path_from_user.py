@@ -24,6 +24,13 @@ class import_path(tk.Tk):
 		self.current_x = self.current_y = 300
 		self.coordinate_list = []
 		
+		#add buttons		
+		self.button_clear = tk.Button(self, text = "Select File", command = self.load_from_file)
+		self.button_clear.pack(side="top", fill="both", expand=True)
+		
+		self.button_clear = tk.Button(self, text = "Clear", command = self.clear)
+		self.button_clear.pack(side="top", fill="both", expand=True)
+		
 		#bind commands
 		self.bind('<B1-Motion>', self.position_previous)
 		self.canvas.bind('<B1-Motion>', self.draw_line)
@@ -65,6 +72,25 @@ class import_path(tk.Tk):
 		else:
 			if event.x != self.coordinate_list[-1][0] or event.y != self.coordinate_list[-1][1]:
 				self.coordinate_list.append([event.x, self.height - event.y])
+				
+	def clear(self):
+		'''Clear all data held in the object and start over'''
+		
+		#clear canvas
+		self.canvas.delete("all")
+		
+		#re-instatiate variables
+		#intialize variables
+		self.counter = 0
+		self.previous_x = self.previous_y = 300
+		self.current_x = self.current_y = 300
+		self.coordinate_list = []
+		
+	def load_from_file(self):
+		'''Allow user to choose file for input'''
+		filename = filedialog.askopenfilename(parent=root, initialdir="./", title='Please select a file')
+		self.coordinate_list = np.loadtxt(filename, comments = ('#'))
+		self.destroy()
 
 if __name__ == "__main__":
 
