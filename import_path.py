@@ -4,8 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 """@package docstring`
-Documentation for this module.
-More details.
+
+This module exists to hold the import_path class, which takes user input and returns the data array for the desired path
+All inputs come through the Tkinter GUI that is opened for the user
+The user is given the option to: 
+    1. Draw their path with the cursor
+    2. Load a path from file
+    3. Enter an analytic formula
+.
 """
 
 class import_path(tk.Tk):
